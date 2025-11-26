@@ -1,3 +1,12 @@
+from .serializers import (
+    PreguntaSerializer,
+    EvaluarRequestSerializer,
+    EvaluarResponseSerializer,
+    RutaMejoraRequestSerializer,
+    RutaMejoraResponseSerializer,
+)
+from .services_ai import generar_ruta_mejora_con_ia
+
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
@@ -72,4 +81,28 @@ def evaluar(request):
     }
 
     resp_serializer = EvaluarResponseSerializer(resp_data)
+    return Response(resp_serializer.data, status=status.HTTP_200_OK)
+
+@api_view(["POST"])
+def ruta_mejora(request):
+    """
+    Toma el resultado del sistema experto (riesgo, recomendaciones, reglas activadas)
+    y llama a una IA externa para generar una ruta de implementación de mejoras.
+    """
+    req_serializer = RutaMejoraRequestSerializer(data=request.data)
+    if not req_serializer.is_valid():
+        return Response(req_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    datos = req_serializer.validated_data
+    riesgo = datos["riesgo"]
+    recomendaciones = datos["recomendaciones"]
+    reglas_activadas = datos["reglas_activadas"]
+
+    texto_ruta = generar_ruta_mejora_con_ia(
+        riesgo=riesgo,
+        recomendaciones=recomendaciones,
+        reglas_activadas=reglas_activadas,
+    )
+
+    resp_serializer = RutaMejoraResponseSerializer({"ruta_mejora": texto_ruta})
     return Response(resp_serializer.data, status=status.HTTP_200_OK)

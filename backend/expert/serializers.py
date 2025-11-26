@@ -56,4 +56,17 @@ class EvaluarResponseSerializer(serializers.Serializer):
     explicabilidad = serializers.DictField()
     evaluacion_id = serializers.IntegerField()
 
+class RutaMejoraRequestSerializer(serializers.Serializer):
+  riesgo = serializers.CharField()
+  puntaje = serializers.IntegerField()
+  recomendaciones = serializers.ListField(
+      child=serializers.CharField()
+  )
+  reglas_activadas = serializers.ListField(
+      child=serializers.DictField()
+  )
+
+
+class RutaMejoraResponseSerializer(serializers.Serializer):
+  ruta_mejora = serializers.CharField()
 
